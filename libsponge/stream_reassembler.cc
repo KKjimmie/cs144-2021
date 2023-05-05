@@ -6,7 +6,7 @@
 // automated checks run by `make check_lab1`.
 
 // You will need to add private members to the class declaration in `stream_reassembler.hh`
-
+#include <iostream>
 using namespace std;
 
 StreamReassembler::StreamReassembler(const size_t capacity)
