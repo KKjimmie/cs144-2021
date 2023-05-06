@@ -32,6 +32,23 @@ class TCPSender {
     //! the (absolute) sequence number for the next byte to be sent
     uint64_t _next_seqno{0};
 
+    // 超时时间上限
+    int _timeout;
+    // 计数器
+    int _timecounter;
+    // 追踪发出去的但是还没有收到ack的tcpsegment
+    std::queue<std::pair<uint64_t, TCPSegment>> _outstanding_queue;
+    // How many sequence numbers are occupied by segments sent but not yet acknowledged
+    size_t _bytes_in_flight;
+    // 对方的window_size
+    size_t _remote_window_sz;
+    // 是否发送了含有syn标记位的报文
+    bool _sent_syn;
+    // 是否发送了含有fin标记位的报文
+    bool _sent_fin;
+    // 连续重传次数
+    size_t _consecutive_retransmissions_count;
+
   public:
     //! Initialize a TCPSender
     TCPSender(const size_t capacity = TCPConfig::DEFAULT_CAPACITY,
