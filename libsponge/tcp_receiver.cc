@@ -8,12 +8,12 @@
 using namespace std;
 
 void TCPReceiver::segment_received(const TCPSegment &seg) {
-    if (! _got_syn && !seg.header().syn){
+    if (!_got_syn && !seg.header().syn) {
         return;
     }
 
     WrappingInt32 seqno = seg.header().seqno;
-    if (! _got_syn && seg.header().syn){
+    if (!_got_syn && seg.header().syn) {
         _got_syn = true;
         _isn = seqno;
         // 由于SYN标志位是没有数据但是占用一个序列号，因此需要加一，得到的是数据的seqno
@@ -28,13 +28,13 @@ void TCPReceiver::segment_received(const TCPSegment &seg) {
 
 optional<WrappingInt32> TCPReceiver::ackno() const {
     // akono 是接收端希望接收的下一个字节的序号
-    if (! _got_syn){
+    if (!_got_syn) {
         return {};
     }
     size_t ackno = _reassembler.stream_out().bytes_written() + 1;
     // 如果接收到的报文中出现了FIN，由于FIN占用一个序列号，但是没有实际数据，因此需要加一
-    if (stream_out().input_ended()){
-        return wrap(ackno+1, _isn);
+    if (stream_out().input_ended()) {
+        return wrap(ackno + 1, _isn);
     }
     return wrap(ackno, _isn);
 }

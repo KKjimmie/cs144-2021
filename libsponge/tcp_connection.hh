@@ -21,6 +21,16 @@ class TCPConnection {
     //! in case the remote TCPConnection doesn't know we've received its whole stream?
     bool _linger_after_streams_finish{true};
 
+    bool _is_alive{true};
+
+    size_t _time_since_last_segment_received{0};
+
+    // 从_sender中取出报文，设置标记位以及window size，将报文push到_segments_out中
+    void send_segments();
+
+    // 发送一个rst报文
+    void send_rst_seg();
+
   public:
     //! \name "Input" interface for the writer
     //!@{

@@ -1,4 +1,5 @@
-#include "socket.hh"
+// #include "socket.hh"
+#include "tcp_sponge_socket.hh"
 #include "util.hh"
 
 #include <cstdlib>
@@ -13,7 +14,8 @@ void get_URL(const string &host, const string &path) {
     // the computer whose name is in the "host" string,
     // then request the URL path given in the "path" string.
     Address addr(host, "http");
-    TCPSocket http_socket;
+    // TCPSocket http_socket;
+    CS144TCPSocket http_socket;
     http_socket.connect(addr);
     http_socket.write("GET " + path + " HTTP/1.1\r\n");
     http_socket.write("Host: " + host + "\r\n");
@@ -28,6 +30,7 @@ void get_URL(const string &host, const string &path) {
     http_socket.close();
     // cerr << "Function called: get_URL(" << host << ", " << path << ").\n";
     // cerr << "Warning: get_URL() has not been implemented yet.\n";
+    http_socket.wait_until_closed();
 }
 
 int main(int argc, char *argv[]) {

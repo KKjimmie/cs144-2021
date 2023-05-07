@@ -26,7 +26,7 @@ WrappingInt32 wrap(uint64_t n, WrappingInt32 isn) {
 uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
     uint32_t offset = n.raw_value() - isn.raw_value();
     // 如果 offset >= checkpoint，表明这两个值都在 32bit范围内，此时offset就是n距离checkpoint最近的absolute seqno
-    if(offset >= checkpoint){
+    if (offset >= checkpoint) {
         return offset;
     }
     uint32_t half = 1ull << 31;
@@ -36,13 +36,14 @@ uint64_t unwrap(WrappingInt32 n, WrappingInt32 isn, uint64_t checkpoint) {
     // result位置可能在下面这两个位置之一：
     // | 表示中点
     // ||-------|----(1)----checkpoint----(2)---|---------checkpoint+2^32||
-    // 如果此时的result比checkpoint+2^31还要大，那就表明n的absulute seqno应该在checkpoint前面的(1)，才满足 "closest"这个要求
+    // 如果此时的result比checkpoint+2^31还要大，那就表明n的absulute seqno应该在checkpoint前面的(1)，才满足
+    // "closest"这个要求
     if (result > checkpoint + half) {
         result -= (1ull << 32);
-    // 否则，如果result比checkpoint-2^31还要小,则表明result应该在(2)位置
-    // 需要注意，checkpoint在此时应该是大于1<<31，否则相减得到的数是负数，转化为 uint64_t 就是非常大的正数。
-    // 例如：-----0--------cp-----1<<31--------offset----1<<32-----------------(3)--
-    // 此时，offset位置就是result位置，如果不判断checkpoint > half，就会得到offset在位置(3)，显然不正确
+        // 否则，如果result比checkpoint-2^31还要小,则表明result应该在(2)位置
+        // 需要注意，checkpoint在此时应该是大于1<<31，否则相减得到的数是负数，转化为 uint64_t 就是非常大的正数。
+        // 例如：-----0--------cp-----1<<31--------offset----1<<32-----------------(3)--
+        // 此时，offset位置就是result位置，如果不判断checkpoint > half，就会得到offset在位置(3)，显然不正确
     } else if (checkpoint > half && result <= checkpoint - half) {
         result += (1ull << 32);
     }
