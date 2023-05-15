@@ -24,7 +24,8 @@ void TCPConnection::segment_received(const TCPSegment &seg) {
     // 如果接收到含有rst标记位的报文，则断开连接
     _time_since_last_segment_received = 0;
     // keep-alive
-    if (_receiver.ackno().has_value() && seg.length_in_sequence_space() == 0 && seg.header().seqno == _receiver.ackno().value() - 1) {
+    if (_receiver.ackno().has_value() && seg.length_in_sequence_space() == 0 &&
+        seg.header().seqno == _receiver.ackno().value() - 1) {
         _sender.send_empty_segment();
         send_segments();
         return;

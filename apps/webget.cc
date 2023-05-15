@@ -14,8 +14,9 @@ void get_URL(const string &host, const string &path) {
     // the computer whose name is in the "host" string,
     // then request the URL path given in the "path" string.
     Address addr(host, "http");
-    // TCPSocket http_socket;
-    CS144TCPSocket http_socket;
+    // TCPSocket http_socket;       // lab0
+    // CS144TCPSocket http_socket;       // lab4
+    FullStackSocket http_socket;  // lab5
     http_socket.connect(addr);
     http_socket.write("GET " + path + " HTTP/1.1\r\n");
     http_socket.write("Host: " + host + "\r\n");
