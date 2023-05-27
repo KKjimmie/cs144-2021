@@ -29,14 +29,39 @@ void Router::add_route(const uint32_t route_prefix,
     cerr << "DEBUG: adding route " << Address::from_ipv4_numeric(route_prefix).ip() << "/" << int(prefix_length)
          << " => " << (next_hop.has_value() ? next_hop->ip() : "(direct)") << " on interface " << interface_num << "\n";
 
-    DUMMY_CODE(route_prefix, prefix_length, next_hop, interface_num);
     // Your code here.
+    _routing_table.push_back({route_prefix, prefix_length, next_hop, interface_num});
 }
 
 //! \param[in] dgram The datagram to be routed
 void Router::route_one_datagram(InternetDatagram &dgram) {
-    DUMMY_CODE(dgram);
     // Your code here.
+    // 获取dst ip
+    uint32_t dst_ip = dgram.header().dst;
+    auto max_match_entry = _routing_table.end();
+
+    // 查询路由表，找到最长匹配的entry
+    for (auto it = _routing_table.begin(); it != _routing_table.end(); ++it) {
+        // prefix_length == 0 时是默认路由
+        if (it->prefix_length != 0 && (dst_ip ^ it->route_prefix) >> (32 - it->prefix_length) != 0)
+            continue;
+        if (max_match_entry == _routing_table.end() || max_match_entry->prefix_length < it->prefix_length)
+            max_match_entry = it;
+    }
+
+    // If no routes matched, the router drops the datagram.
+    if (max_match_entry == _routing_table.end())
+        return;
+
+    // ttl 大于 1，则转发
+    if (dgram.header().ttl > 1) {
+        dgram.header().ttl--;
+        AsyncNetworkInterface &interface = _interfaces[max_match_entry->interface_num];
+        if (max_match_entry->next_hop.has_value())
+            interface.send_datagram(dgram, max_match_entry->next_hop.value());
+        else
+            interface.send_datagram(dgram, Address::from_ipv4_numeric(dst_ip));
+    }
 }
 
 void Router::route() {
